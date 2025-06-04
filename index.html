@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment WANNSTORE</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap");
+
+      /* Variabel Tema */
+      :root {
+        --bg-color: #000;
+        --text-color: #fff;
+        --box-bg: rgba(0, 0, 0, 0.8);
+        --box-shadow: 0 0 20px cyan;
+        --btn-bg: black;
+        --btn-text: cyan;
+        --btn-border: cyan;
+        --copy-bg: rgba(0, 255, 255, 0.1);
+        --copy-border: cyan;
+        --popup-bg: rgba(0, 255, 255, 0.2);
+        --snow-color: #fff;
+      }
+
+      /* Tema Light Mode */
+      body.light-mode {
+        --bg-color: #fff;
+        --text-color: #000;
+        --box-bg: rgba(255, 255, 255, 0.8);
+        --box-shadow: 0 0 20px blue;
+        --btn-bg: white;
+        --btn-text: blue;
+        --btn-border: blue;
+        --copy-bg: rgba(0, 0, 255, 0.1);
+        --copy-border: blue;
+        --popup-bg: rgba(0, 0, 255, 0.2);
+        --snow-color: #000; /* Salju jadi hitam di mode terang */
+      }
+
+      body {
+        font-family: "Orbitron", sans-serif;
+        text-align: center;
+        padding: 20px;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: background-color 0.3s, color 0.3s;
+        position: relative;
+        z-index: 0;
+      }
+      .payment-box {
+        background: var(--box-bg);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: var(--box-shadow);
+        max-width: 400px;
+        margin: auto;
+        transition: background 0.3s, box-shadow 0.3s;
+        position: relative;
+        z-index: 2;
+      }
+      .thumbnail {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 50%;
+        margin-bottom: 10px;
+        box-shadow: 0 0 15px cyan;
+      }
+      .neon-btn {
+        background: var(--btn-bg);
+        color: var(--btn-text);
+        border: 2px solid var(--btn-border);
+        padding: 10px 15px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+        box-shadow: 0 0 10px var(--btn-border);
+        transition: 0.3s;
+        margin-bottom: 20px;
+      }
+      .neon-btn:hover {
+        background: var(--btn-text);
+        color: var(--btn-bg);
+        box-shadow: 0 0 20px var(--btn-border);
+      }
+      .neon-btn:active {
+        transform: scale(0.9);
+      }
+      .copy-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px;
+        border: 1px solid var(--copy-border);
+        border-radius: 5px;
+        background: var(--copy-bg);
+        color: var(--btn-text);
+        margin-bottom: 15px;
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .payment-logo {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 50%;
+        margin-right: 10px;
+        box-shadow: 0 0 10px var(--btn-border);
+      }
+      .copy-box span {
+        flex-grow: 1;
+        text-align: left;
+      }
+      .copy-box button {
+        background: var(--btn-text);
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        color: var(--btn-bg);
+        transition: 0.2s;
+        margin-left: 10px;
+      }
+      .copy-box button:active {
+        transform: scale(0.9);
+      }
+      .popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        align-items: center;
+        justify-content: center;
+        z-index: 3;
+      }
+      .popup-content {
+        position: relative;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px var(--btn-border);
+        text-align: center;
+        color: white;
+        overflow: hidden;
+        background: url("https://files.catbox.moe/l9j96f.jpg") no-repeat center
+          center;
+        background-size: cover;
+      }
+
+      .popup-content::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5); /* overlay hitam transparan */
+        z-index: 0;
+        border-radius: 10px;
+      }
+
+      .popup-content > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Updated QRIS image styles for responsiveness */
+      .qr-image {
+        max-width: 300px; /* max width desktop */
+        width: 100%; /* responsive */
+        height: auto;
+        display: block;
+        margin: auto;
+      }
+      @media (max-width: 480px) {
+        .qr-image {
+          max-width: 80vw; /* max width mobile */
+        }
+      }
+      .footer {
+        margin-top: 20px;
+        font-size: 14px;
+        color: var(--btn-text);
+        position: relative;
+        z-index: 2;
+      }
+      #copyPopup {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--popup-bg);
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        color: var(--btn-text);
+        text-align: center;
+        box-shadow: 0 0 15px var(--btn-border);
+        animation: fadeInOut 1.5s ease-in-out;
+        z-index: 4;
+      }
+      @keyframes fadeInOut {
+        0% {
+          opacity: 0;
+          transform: translateX(-50%) translateY(10px);
+        }
+        20% {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+        80% {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+        100% {
+          opacity: 0;
+          transform: translateX(-50%) translateY(-10px);
+        }
+      }
+      #modeToggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        background-color: var(--btn-text);
+        color: var(--btn-bg);
+        cursor: pointer;
+        box-shadow: 0 0 10px var(--btn-border);
+        transition: background-color 0.3s, color 0.3s;
+        z-index: 5;
+      }
+      #modeToggle:hover {
+        opacity: 0.8;
+      }
+
+      /* Salju */
+      #snowCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Tombol Mode Toggle -->
+    <button id="modeToggle" onclick="toggleMode()">☀</button>
+
+    <canvas id="snowCanvas"></canvas>
+
+    <div class="payment-box">
+      <img
+        src="https://img1.pixhost.to/images/6227/607152452_imgtmp.jpg"
+        alt="Thumbnail"
+        class="thumbnail"
+      />
+      <h2>Metode Pembayaran</h2>
+      <button class="neon-btn" onclick="showQR()">QRIS</button>
+
+      <div class="copy-box">
+        <img
+          src="https://files.catbox.moe/6jtvll.png"
+          alt="Dana"
+          class="payment-logo"
+        />
+        <span>DANA</span>
+        <button onclick="copyToClipboard('089616144080')">Copy</button>
+      </div>
+      <div class="copy-box">
+        <img
+          src="https://files.catbox.moe/7nz86g.jpg"
+          alt="Gopay"
+          class="payment-logo"
+        />
+        <span>GOPAY</span>
+        <button onclick="copyToClipboard('089616144080')">Copy</button>
+      </div>
+      <br />
+      <a>Sertakan bukti transfer demi keamanan bersama</a>
+    </div>
+
+    <div id="copyPopup">Berhasil di salin!</div>
+
+    <div class="popup" id="qrPopup">
+      <div class="popup-content">
+        <h3>Scan QRIS</h3>
+        <img
+          src="https://img1.pixhost.to/images/6227/607152494_imgtmp.jpg"
+          alt="QRIS"
+          class="qr-image"
+        />
+      </div>
+    </div>
+
+    <div class="footer">
+      <a
+        href="https://wa.me/6289504651143"
+        target="_blank"
+        style="color: var(--btn-text); text-decoration: none; font-weight: bold"
+      >
+        © WANN - STORE
+      </a>
+    </div>
+
+    <script>
+      function showQR() {
+        document.getElementById("qrPopup").style.display = "flex";
+      }
+
+      document
+        .getElementById("qrPopup")
+        .addEventListener("click", function (event) {
+          if (
+            event.target === this ||
+            event.target.classList.contains("qr-image")
+          ) {
+            this.style.display = "none";
+          }
+        });
+
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text);
+        let popup = document.getElementById("copyPopup");
+        popup.style.display = "block";
+        setTimeout(() => {
+          popup.style.display = "none";
+        }, 1500);
+      }
+
+      function toggleMode() {
+        document.body.classList.toggle("light-mode");
+        const modeToggle = document.getElementById("modeToggle");
+        modeToggle.textContent = document.body.classList.contains("light-mode")
+          ? "☾"
+          : "☀";
+      }
+
+      // Salju Adaptif
+      const canvas = document.getElementById("snowCanvas");
+      const ctx = canvas.getContext("2d");
+      let width, height;
+      let snowflakes = [];
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      function createSnowflakes() {
+        const flakes = [];
+        for (let i = 0; i < 100; i++) {
+          flakes.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() * 3 + 1,
+            density: Math.random() * 1 + 0.5,
+          });
+        }
+        return flakes;
+      }
+
+      function drawSnowflakes() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue(
+          "--snow-color"
+        );
+        ctx.beginPath();
+        for (let flake of snowflakes) {
+          ctx.moveTo(flake.x, flake.y);
+          ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2, true);
+        }
+        ctx.fill();
+        moveSnowflakes();
+      }
+
+      function moveSnowflakes() {
+        for (let flake of snowflakes) {
+          flake.y += Math.pow(flake.density, 2) + 1;
+          flake.x += Math.sin(flake.y * 0.01);
+          if (flake.y > height) {
+            flake.y = 0;
+            flake.x = Math.random() * width;
+          }
+        }
+      }
+
+      function update() {
+        drawSnowflakes();
+        requestAnimationFrame(update);
+      }
+
+      window.addEventListener("resize", () => {
+        resize();
+        snowflakes = createSnowflakes();
+      });
+
+      resize();
+      snowflakes = createSnowflakes();
+      update();
+    </script>
+  </body>
+</html>
